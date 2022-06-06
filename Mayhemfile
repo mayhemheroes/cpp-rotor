@@ -1,0 +1,5 @@
+project: cpp-rotor
+target: cpp-rotor
+
+cmds:
+  - cmd: /repo/build/examples/thread/sha512 @@
