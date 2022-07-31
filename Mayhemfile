@@ -1,0 +1,5 @@
+project: cpp-rotor
+target: sha512
+
+cmds:
+  - cmd: /sha512 @@
