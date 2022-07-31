@@ -2,4 +2,4 @@ project: cpp-rotor
 target: sha512
 
 cmds:
-  - cmd: /repo/build/examples/thread/sha512 @@
+  - cmd: /sha512 @@
