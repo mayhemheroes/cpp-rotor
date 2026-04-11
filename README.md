@@ -62,8 +62,10 @@ Please read tutorial, design principles and manual [here](https://basiliscos.git
 ## embedded
 
 Looking for something actor-flavored, but suitable for embedded applications?
-Take a look into my [rotor-light](https://notabug.org/basiliscos/cpp-rotor-light)
-project.
+Take a look into [tardigrade](https://github.com/J-Roux/tardigrade) project of
+my friend or [rotor-light](https://github.com/basiliscos/cpp-rotor-light).
+To my opinion [tardigrade](https://github.com/J-Roux/tardigrade) is a bit better
+designed and should be considered first.
 
 ## Changelog
 
