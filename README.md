@@ -75,7 +75,7 @@ designed and should be considered first.
 
 ## Changelog
 
-### 0.41 (xx-xxx-2026)
+### 0.41 (18-May-2026)
  - [bugfix] avoid race in `registry` plugin during shutdown
  - [bugfix] avoid race in `link_client` plugin during shutdown
  - [bugfix] avoid race in `supervisor` during requests discarding

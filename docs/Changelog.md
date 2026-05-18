@@ -4,7 +4,7 @@
 [reliable]: https://en.wikipedia.org/wiki/Reliability_(computer_networking) "reliable"
 [request-response]: https://en.wikipedia.org/wiki/Request%E2%80%93response
 
-### 0.41 (xx-xxx-2026)
+### 0.41 (18-May-2026)
  - [bugfix] avoid race in `registry` plugin during shutdown
  - [bugfix] avoid race in `link_client` plugin during shutdown
  - [bugfix] avoid race in `supervisor` during requests discarding
