@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2021 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -34,7 +34,8 @@ struct actor_test_t : public actor_base_t {
 
     ~actor_test_t();
     plugin_configurer_t configurer;
-    shutdown_fn_t shutdowner;
+    shutdown_fn_t shutdown_start_fn;
+    shutdown_fn_t shutdown_finish_fn;
 
     void configure(plugin::plugin_base_t &plugin) noexcept override;
     auto &get_plugins() const noexcept { return plugins; }
@@ -43,6 +44,7 @@ struct actor_test_t : public actor_base_t {
 
     auto &get_state() noexcept { return state; }
 
+    void shutdown_start() noexcept override;
     void shutdown_finish() noexcept override;
     void force_cleanup() noexcept;
 };

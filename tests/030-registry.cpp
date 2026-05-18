@@ -526,3 +526,59 @@ TEST_CASE("no problems when supervisor registers self in a registry", "[registry
     sup->do_process();
     CHECK(sup->get_state() == r::state_t::SHUT_DOWN);
 }
+
+TEST_CASE("tolerate late discovery promise arrival", "[registry][supervisor]") {
+    struct custom_registry_t : rt::actor_test_t {
+        using parent_t = rt::actor_test_t;
+        using parent_t::parent_t;
+        using discovery_promise_ptr_t = r::intrusive_ptr_t<r::message::discovery_promise_t>;
+
+        void on_promise(r::message::discovery_promise_t &req_) noexcept { req = &req_; }
+
+        void configure(r::plugin::plugin_base_t &plugin) noexcept override {
+            r::actor_base_t::configure(plugin);
+            plugin.with_casted<r::plugin::starter_plugin_t>(
+                [](auto &p) { p.subscribe_actor(&custom_registry_t::on_promise); });
+        }
+
+        discovery_promise_ptr_t req;
+    };
+
+    r::system_context_t system_context;
+    auto sup = system_context.create_supervisor<rt::supervisor_test_t>().timeout(rt::default_timeout).finish();
+
+    sup->do_process();
+    auto registry = sup->create_actor<custom_registry_t>().timeout(rt::default_timeout).finish();
+    sup->do_process();
+
+    sup->access<rt::to::registry>() = registry->get_address();
+    auto act_2 = sup->create_actor<sample_actor_t>().timeout(rt::default_timeout).finish();
+    act_2->configurer = [&](auto &, r::plugin::plugin_base_t &plugin) {
+        plugin.with_casted<r::plugin::registry_plugin_t>(
+            [&act_2](auto &p) { p.discover_name("any-name", act_2->service_addr, true).link(false); });
+    };
+    act_2->shutdown_start_fn = [&](auto &) {
+        registry->reply_to(*registry->req, sup->get_address());
+        act_2->r::actor_base_t::shutdown_start();
+    };
+
+    auto act_3 = sup->create_actor<sample_actor_t>().timeout(rt::default_timeout).finish();
+    act_3->configurer = [&](auto &, r::plugin::plugin_base_t &plugin) {
+        plugin.with_casted<r::plugin::link_client_plugin_t>([&act_2](auto &p) { p.link(act_2->get_address()); });
+    };
+
+    sup->do_process();
+    REQUIRE(registry->req);
+
+    act_3->do_shutdown();
+    act_2->do_shutdown();
+    sup->do_process();
+    CHECK(act_3->get_state() == r::state_t::SHUT_DOWN);
+    CHECK(act_2->get_state() == r::state_t::SHUT_DOWN);
+
+    sup->do_shutdown();
+    sup->do_process();
+
+    CHECK(registry->get_state() == r::state_t::SHUT_DOWN);
+    CHECK(sup->get_state() == r::state_t::SHUT_DOWN);
+}
