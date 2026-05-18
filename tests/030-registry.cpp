@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2023 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -557,11 +557,6 @@ TEST_CASE("tolerate late discovery promise arrival", "[registry][supervisor]") {
         plugin.with_casted<r::plugin::registry_plugin_t>(
             [&act_2](auto &p) { p.discover_name("any-name", act_2->service_addr, true).link(false); });
     };
-    act_2->shutdown_start_fn = [&](auto &) {
-        registry->reply_to(*registry->req, sup->get_address());
-        act_2->r::actor_base_t::shutdown_start();
-    };
-
     auto act_3 = sup->create_actor<sample_actor_t>().timeout(rt::default_timeout).finish();
     act_3->configurer = [&](auto &, r::plugin::plugin_base_t &plugin) {
         plugin.with_casted<r::plugin::link_client_plugin_t>([&act_2](auto &p) { p.link(act_2->get_address()); });
@@ -570,11 +565,29 @@ TEST_CASE("tolerate late discovery promise arrival", "[registry][supervisor]") {
     sup->do_process();
     REQUIRE(registry->req);
 
-    act_3->do_shutdown();
-    act_2->do_shutdown();
-    sup->do_process();
-    CHECK(act_3->get_state() == r::state_t::SHUT_DOWN);
-    CHECK(act_2->get_state() == r::state_t::SHUT_DOWN);
+    SECTION("shutdown order-1") {
+        act_2->shutdown_start_fn = [&](auto &) {
+            registry->reply_to(*registry->req, sup->get_address());
+            act_2->r::actor_base_t::shutdown_start();
+        };
+
+        act_3->do_shutdown();
+        act_2->do_shutdown();
+        sup->do_process();
+        CHECK(act_3->get_state() == r::state_t::SHUT_DOWN);
+        CHECK(act_2->get_state() == r::state_t::SHUT_DOWN);
+    }
+    SECTION("shutdown order-2") {
+        act_3->do_shutdown();
+        sup->do_process();
+
+        registry->reply_to(*registry->req, sup->get_address());
+        act_2->do_shutdown();
+        sup->do_process();
+
+        CHECK(act_3->get_state() == r::state_t::SHUT_DOWN);
+        CHECK(act_2->get_state() == r::state_t::SHUT_DOWN);
+    }
 
     sup->do_shutdown();
     sup->do_process();

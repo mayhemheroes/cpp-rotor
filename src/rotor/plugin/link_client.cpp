@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2023 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -82,9 +82,14 @@ void link_client_plugin_t::on_link_response(message::link_response_t &message) n
             actor->do_shutdown(make_error(ec_inner, ec));
         } */
     } else {
-        it->second.state = link_state_t::OPERATIONAL;
-        if (actor->access<to::init_request>()) {
-            actor->init_continue();
+        if (actor->access<to::state>() == state_t::SHUTTING_DOWN) {
+            // ingore link responce and continue shudown
+            actor->shutdown_continue();
+        } else {
+            it->second.state = link_state_t::OPERATIONAL;
+            if (actor->access<to::init_request>()) {
+                actor->init_continue();
+            }
         }
     }
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 //
-// Copyright (c) 2019-2025 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -328,7 +328,7 @@ struct ROTOR_API supervisor_t : public actor_base_t {
     friend struct actor_base_t;
     template <typename T> friend struct plugin::delivery_plugin_t;
 
-    void discard_request(request_id_t request_id) noexcept;
+    bool discard_request(request_id_t request_id) noexcept;
     void uplift_last_message() noexcept;
 
     void on_shutdown_check_timer(request_id_t, bool cancelled) noexcept;
@@ -554,9 +554,10 @@ template <typename T> void request_builder_t<T>::install_handler() noexcept {
             auto &curry = it->second;
             auto &orig_addr = curry.origin;
             supervisor->template send<wrapped_res_t>(orig_addr, msg.payload);
-            supervisor->discard_request(request_id);
-            // keep order, i.e. deliver response immediately
-            supervisor->uplift_last_message();
+            if (supervisor->discard_request(request_id)) {
+                // keep order, i.e. deliver response immediately
+                supervisor->uplift_last_message();
+            }
         }
     });
     auto wrapped_handler = wrap_handler(sup, std::move(handler));
