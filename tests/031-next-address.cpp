@@ -53,6 +53,9 @@ TEST_CASE("delivery to unknown addr", "[message]") {
 
     sup->do_process();
     REQUIRE(act->samples_received == 1);
+
+    sup->do_shutdown();
+    sup->do_process();
 }
 
 TEST_CASE("delivery to local address, then route to destroy address", "[message]") {
@@ -91,6 +94,9 @@ TEST_CASE("delivery to local address, then route to destroy address", "[message]
 
     sup->do_process();
     REQUIRE(act->samples_received == 20);
+
+    sup->do_shutdown();
+    sup->do_process();
 }
 
 TEST_CASE("delivery to external address, then route to destroy address", "[message]") {
@@ -148,6 +154,14 @@ TEST_CASE("delivery to external address, then route to destroy address", "[messa
     }
 
     REQUIRE(samples_received == 20);
+
+    sup1->do_shutdown();
+    sup2->do_shutdown();
+
+    while (!sup1->get_leader_queue().empty() || !sup2->get_leader_queue().empty()) {
+        sup1->do_process();
+        sup2->do_process();
+    }
 }
 
 TEST_CASE("delivery to external subscriber, then route to destroy address", "[message]") {
@@ -211,6 +225,14 @@ TEST_CASE("delivery to external subscriber, then route to destroy address", "[me
     }
 
     REQUIRE(samples_received == 20);
+
+    sup1->do_shutdown();
+    sup2->do_shutdown();
+
+    while (!sup1->get_leader_queue().empty() || !sup2->get_leader_queue().empty()) {
+        sup1->do_process();
+        sup2->do_process();
+    }
 }
 
 TEST_CASE("route & redirect (high-level api)", "[message]") {
@@ -257,4 +279,7 @@ TEST_CASE("route & redirect (high-level api)", "[message]") {
     sup->do_process();
 
     REQUIRE(act->value == -1);
+
+    sup->do_shutdown();
+    sup->do_process();
 }
