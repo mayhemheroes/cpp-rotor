@@ -189,9 +189,10 @@ template <typename Message> void process_discovery(registry_plugin_t::discovery_
     auto &service = message.payload.req->payload.request_payload.service_name;
     auto &ee = message.payload.ee;
     auto it = dm.find(service);
-    assert(it != dm.end());
-    address_ptr_t *address_value = ee ? nullptr : &message.payload.res.service_addr;
-    it->second.template access<to::on_discovery, address_ptr_t *, const extended_error_ptr_t &>(address_value, ee);
+    if (it != dm.end()) {
+        address_ptr_t *address_value = ee ? nullptr : &message.payload.res.service_addr;
+        it->second.template access<to::on_discovery, address_ptr_t *, const extended_error_ptr_t &>(address_value, ee);
+    }
 }
 
 void registry_plugin_t::discovery_task_t::on_discovery(address_ptr_t *service_addr,

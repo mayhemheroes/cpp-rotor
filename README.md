@@ -75,6 +75,11 @@ designed and should be considered first.
 
 ## Changelog
 
+### 0.41 (18-May-2026)
+ - [bugfix] avoid race in `registry` plugin during shutdown
+ - [bugfix] avoid race in `link_client` plugin during shutdown
+ - [bugfix] avoid race in `supervisor` during requests discarding
+
 ### 0.40 (27-Dec-2025)
  - [doc] update synthetic performance metrics
  - [bugfix] [thread-backend] decrease cpu usage

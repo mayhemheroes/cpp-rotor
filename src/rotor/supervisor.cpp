@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2022 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -137,10 +137,13 @@ void supervisor_t::on_request_trigger(request_id_t timer_id, bool cancelled) noe
     }
 }
 
-void supervisor_t::discard_request(request_id_t request_id) noexcept {
-    assert(request_map.find(request_id) != request_map.end());
-    cancel_timer(request_id);
-    request_map.erase(request_id);
+bool supervisor_t::discard_request(request_id_t request_id) noexcept {
+    if (request_map.find(request_id) != request_map.end()) {
+        cancel_timer(request_id);
+        request_map.erase(request_id);
+        return true;
+    }
+    return false;
 }
 
 void supervisor_t::shutdown_finish() noexcept {

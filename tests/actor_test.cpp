@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2021 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -25,8 +25,16 @@ void actor_test_t::force_cleanup() noexcept {
     lifetime->access<to::points>().clear();
 }
 
+void actor_test_t::shutdown_start() noexcept {
+    if (shutdown_start_fn) {
+        shutdown_start_fn(*this);
+    } else {
+        actor_base_t::shutdown_start();
+    }
+}
+
 void actor_test_t::shutdown_finish() noexcept {
     actor_base_t::shutdown_finish();
-    if (shutdowner)
-        shutdowner(*this);
+    if (shutdown_finish_fn)
+        shutdown_finish_fn(*this);
 }

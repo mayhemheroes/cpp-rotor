@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2019-2024 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
+// Copyright (c) 2019-2026 Ivan Baidakou (basiliscos) (the dot dmol at gmail dot com)
 //
 // Distributed under the MIT Software License
 //
@@ -542,7 +542,7 @@ TEST_CASE("proper shutdown order, defined by linkage", "[actor]") {
         auto &self = static_cast<tracked_actor_t &>(me);
         self.shutdown_event = event_id++;
     };
-    act_1->shutdowner = act_2->shutdowner = act_3->shutdowner = shutdowner;
+    act_1->shutdown_finish_fn = act_2->shutdown_finish_fn = act_3->shutdown_finish_fn = shutdowner;
 
     act_1->configurer = [&](auto &, r::plugin::plugin_base_t &plugin) {
         plugin.with_casted<r::plugin::link_client_plugin_t>([&](auto &p) {
